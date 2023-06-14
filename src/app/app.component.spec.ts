@@ -1,31 +1,33 @@
 import { TestBed } from '@angular/core/testing';
 import { AppComponent } from './app.component';
-
+import { WrapComponent } from 'src/utils/test-helpers';
+import { By } from '@angular/platform-browser';
+import { MockComponent } from 'ng-mocks';
+import { OtherComponentComponent } from './other-component/other-component.component';
+const wrapper = WrapComponent(AppComponent);
 describe('AppComponent', () => {
+
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       declarations: [
-        AppComponent
+        AppComponent,
+        wrapper,
+        //removing below line will make the test work, no idea why.
+        MockComponent(OtherComponentComponent),
       ],
     }).compileComponents();
   });
 
-  it('should create the app', () => {
-    const fixture = TestBed.createComponent(AppComponent);
-    const app = fixture.componentInstance;
-    expect(app).toBeTruthy();
+  //this wouldn't work with ng-mocks, somehow, AppComponent usage within the wrapper is replaced with a mock (only when we mock other components, more info at line 16).
+  it('should find test header within the wrapper component', () => {
+    const fixture = TestBed.createComponent(wrapper);
+    let el = fixture.debugElement.query(By.css('#test-header'));
+    expect(el).toBeTruthy();
   });
 
-  it(`should have as title 'mocks-issue'`, () => {
+  it(`should find test header within the actual component`, () => {
     const fixture = TestBed.createComponent(AppComponent);
-    const app = fixture.componentInstance;
-    expect(app.title).toEqual('mocks-issue');
-  });
-
-  it('should render title', () => {
-    const fixture = TestBed.createComponent(AppComponent);
-    fixture.detectChanges();
-    const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('.content span')?.textContent).toContain('mocks-issue app is running!');
+    let el = fixture.debugElement.query(By.css('#test-header'));
+    expect(el).toBeTruthy();
   });
 });
